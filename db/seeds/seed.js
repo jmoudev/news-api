@@ -28,16 +28,8 @@ exports.seed = function (knex) {
       return knex('articles').insert(formattedArticles).returning('*');
     })
     .then(articleRows => {
-      // console.log(articleRows);
-
-      // console.log(createArticleLookup(articleRows));
-      // create references fro the username and article_id
-
-      // changeUserKey;
-
-      // username from comments.created_by / user.username
-      // article_id for comments from the articles.title / comments.belongs_to
-
-      return knex('comments').insert();
+      const articleLookup = createArticleLookup(articleRows)
+      const formattedCommentsData = formatCommentsData(commentData, articleLookup);
+      return knex('comments').insert(formattedCommentsData).returning('*');
     });
 };
