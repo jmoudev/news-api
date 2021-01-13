@@ -6,23 +6,50 @@ afterAll(() => connection.destroy());
 
 beforeEach(() => connection.seed.run());
 
+describe('route not found', () => {
+  it('ERROR - status 404 - route not found', () => {
+    return request(app)
+      .get('/api/topic')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Not Found: /api/topic');
+      });
+  });
+});
+
 describe('/api', () => {
-  describe.only('/topics', () => {
-    it('GET - status 200 - returns all topics', () => {
-      return request(app)
-        .get('/api/topics')
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.topics).toHaveLength(3);
-          body.topics.forEach(topic => {
-            expect(topic).toEqual(
-              expect.objectContaining({
-                description: expect.any(String),
-                slug: expect.any(String)
-              })
-            );
+  describe('/topics', () => {
+    describe('GET', () => {
+      it('GET - status 200 - returns all topics', () => {
+        return request(app)
+          .get('/api/topics')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.topics).toHaveLength(3);
+            body.topics.forEach(topic => {
+              expect(topic).toEqual(
+                expect.objectContaining({
+                  description: expect.any(String), // need to evaluate || null for  items without notNullable field
+                  slug: expect.any(String)
+                })
+              );
+            });
+          });
+      });
+    });
+    describe('/users', () => {
+      describe('/:username', () => {
+        describe.only('GET', () => {
+          it('GET - status 200 - returns specific user', () => {
+            return request(app)
+              .get('/api/users/1')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.user).toEqual();
+              });
           });
         });
+      });
     });
   });
 
