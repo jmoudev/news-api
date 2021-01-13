@@ -12,7 +12,7 @@ describe('route not found', () => {
       .get('/api/topic')
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('Not Found: /api/topic');
+        expect(body.msg).toBe('Not Found - path: "/api/topic"');
       });
   });
 });
@@ -39,43 +39,103 @@ describe('/api', () => {
     });
     describe('/users', () => {
       describe('/:username', () => {
-        describe.only('GET', () => {
+        describe('GET', () => {
           it('GET - status 200 - returns specific user', () => {
             return request(app)
-              .get('/api/users/1')
+              .get('/api/users/butter_bridge')
               .expect(200)
               .then(({ body }) => {
-                expect(body.user).toEqual();
+                expect(body.user).toEqual(
+                  expect.objectContaining({
+                    username: 'butter_bridge',
+                    avatar_url: expect.any(String),
+                    name: expect.any(String)
+                  })
+                );
               });
           });
+          it('GET - ERROR status 404 - user does not exist', () => {
+            return request(app)
+              .get('/api/users/not_a_user')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Not Found - username: "not_a_user"');
+              });
+          });
+          // it(
+          //   ('GET - ERROR status 400 - bad request on username',
+          //   () => {
+          //     return request(app).get('/api/users/??').expect(404);
+          //   })
+          // );
         });
       });
     });
   });
 
-  let testPatchArticle;
-
-  beforeEach(() => {
-    testPatchArticle = {
-      article_id: 1,
-      title: 'Living in the shadow of a great man',
-      body: 'I find this existence challenging',
-      votes: 105,
-      topic: 'mitch',
-      author: 'butter_bridge',
-      created_at: new Date(1542284514171)
-    };
-  });
-
   describe('/articles', () => {
-    it('PATCH - status 201 - return updated article when patch positive integer', () => {
-      return request(app)
-        .patch('/api/articles/1')
-        .send({ inc_votes: 5 })
-        .expect(201)
-        .then(({ body }) => {
-          expect(body.article).toEqual(testPatchArticle);
+    describe('/:article_id', () => {
+      describe('GET', () => {
+        it('GET - status 200 - return specific article', () => {
+          return request(app)
+            .get('/api/articles/1')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.article).toEqual(
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: 1,
+                  body: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  comment_count: 13
+                })
+              );
+            });
         });
+        it('GET - ERROR status 404 - article does not exist', () => {
+          return request(app)
+            .get('/api/articles/999')
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Not Found - article_id: "999"');
+            });
+        });
+        it('GET - ERROR status 400 - bad request on article_id', () => {
+          return request(app)
+            .get('/api/articles/not_an_id')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe(
+                'Bad Request - invalid input syntax for type integer: "not_an_id"'
+              );
+            });
+        });
+      });
+      describe('PATCH', () => {
+        it('PATCH - status 201 - return updated article when patch positive integer', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 5 })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toEqual(
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: 1,
+                  body: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: 105
+                  // comment_count: 18
+                })
+              );
+            });
+        });
+      });
     });
   });
 });
