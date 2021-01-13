@@ -1,10 +1,15 @@
 const express = require('express');
 const app = express();
 const apiRouter = require('./routers/api.router');
+const {
+  handleRouteNotFound,
+  handleCustomErrors
+} = require('./controllers/errors.controllers');
 
 app.use(express.json());
-console.log('before routing');
 app.use('/api', apiRouter);
-console.log('after routing');
+app.all('/*', handleRouteNotFound);
+
+app.use(handleCustomErrors);
 
 module.exports = app;
