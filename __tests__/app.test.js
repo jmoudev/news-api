@@ -1,41 +1,54 @@
 const request = require('supertest');
-const app = require('../app');
 const connection = require('../connection');
+const app = require('../app');
 
-afterAll(() => {
-  return connection.destroy();
-});
+afterAll(() => connection.destroy());
 
-beforeEach(() => {
-  return connection.seed.run();
-});
+beforeEach(() => connection.seed.run());
 
-describe('./api', () => {
-  describe('/topics', () => {
+describe('/api', () => {
+  describe.only('/topics', () => {
     it('GET - status 200 - returns all topics', () => {
       return request(app)
-        .get('/api/topics/')
+        .get('/api/topics')
         .expect(200)
         .then(({ body }) => {
           expect(body.topics).toHaveLength(3);
-          expect(body.topics[0]).toEqual(
-            expect.objectContaining({
-              description: expect.any(String),
-              slug: expect.any(String)
-            })
-          );
+          body.topics.forEach(topic => {
+            expect(topic).toEqual(
+              expect.objectContaining({
+                description: expect.any(String),
+                slug: expect.any(String)
+              })
+            );
+          });
         });
     });
   });
-  describe.only('/articles', () => {
-    it('PATCH - status 201 - return updated article', () => {
+
+  let testPatchArticle;
+
+  beforeEach(() => {
+    testPatchArticle = {
+      article_id: 1,
+      title: 'Living in the shadow of a great man',
+      body: 'I find this existence challenging',
+      votes: 105,
+      topic: 'mitch',
+      author: 'butter_bridge',
+      created_at: new Date(1542284514171)
+    };
+  });
+
+  describe('/articles', () => {
+    it('PATCH - status 201 - return updated article when patch positive integer', () => {
       return request(app)
-        .patch('/api/articles/2')
+        .patch('/api/articles/1')
         .send({ inc_votes: 5 })
-        .expect(201);
-      // .then(({ body }) => {
-      //   console.log(body);
-      // });
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.article).toEqual(testPatchArticle);
+        });
     });
   });
 });
