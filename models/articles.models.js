@@ -33,6 +33,11 @@ exports.updateArticle = (article_id, inc_votes) => {
         .groupBy('articles.article_id');
     })
     .then(([article]) => {
+      if (!article)
+        return Promise.reject({
+          status: 404,
+          msg: `Not Found - article_id: "${article_id}"`
+        });
       article.comment_count = +article.comment_count;
       return { article };
     });

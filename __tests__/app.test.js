@@ -135,10 +135,48 @@ describe('/api', () => {
               );
             });
         });
-        it('PATCH - ERROR status 404 - article does not exist', () => {});
-        it('PATCH - ERROR status 400 - bad request on article_id', () => {});
-        it('PATCH - ERROR status 400 - bad request body missing required fields', () => {});
-        it('PATCH - ERROR status 400 - bad request body incorrect type', () => {});
+        it('PATCH - ERROR status 404 - article does not exist', () => {
+          return request(app)
+            .patch('/api/articles/999')
+            .send({ inc_votes: 5 })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Not Found - article_id: "999"');
+            });
+        });
+        it('PATCH - ERROR status 400 - bad request on article_id', () => {
+          return request(app)
+            .patch('/api/articles/not_an_id')
+            .send({ inc_votes: 5 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe(
+                'Bad Request - invalid input syntax for type integer: "not_an_id"'
+              );
+            });
+        });
+        it('PATCH - ERROR status 400 - bad request body missing required fields', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({})
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe(
+                'Bad Request - missing required field: "inc_votes"'
+              );
+            });
+        });
+        it('PATCH - ERROR status 400 - bad request body incorrect type', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 'not_an_int' })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe(
+                'Bad Request - invalid input syntax for type integer: "NaN"'
+              );
+            });
+        });
       });
     });
   });
