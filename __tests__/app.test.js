@@ -114,7 +114,7 @@ describe('/api', () => {
             });
         });
       });
-      describe.only('PATCH', () => {
+      describe('PATCH', () => {
         it('PATCH - status 201 - return article with updated votes integer', () => {
           return request(app)
             .patch('/api/articles/1')
@@ -176,6 +176,28 @@ describe('/api', () => {
                 'Bad Request - invalid input syntax for type integer: "NaN"'
               );
             });
+        });
+      });
+      describe('/comments', () => {
+        describe('POST', () => {
+          it.only('POST - status 201 - return posted comment', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ username: 'butter_bridge', body: 'So true...' })
+              .expect(201)
+              .then(({ body }) => {
+                expect(body.comment).toEqual(
+                  expect.objectContaining({
+                    comment_id: expect.any(Number),
+                    username: 'butter_bridge',
+                    article_id: 1,
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    body: 'So true...'
+                  })
+                );
+              });
+          });
         });
       });
     });
