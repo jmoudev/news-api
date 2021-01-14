@@ -1,2 +1,4 @@
 node_modules
 knexfile.js
+query.sql
+output.txt

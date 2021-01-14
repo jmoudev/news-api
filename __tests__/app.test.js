@@ -114,8 +114,8 @@ describe('/api', () => {
             });
         });
       });
-      describe('PATCH', () => {
-        it('PATCH - status 201 - return updated article when patch positive integer', () => {
+      describe.only('PATCH', () => {
+        it('PATCH - status 201 - return article with updated votes integer', () => {
           return request(app)
             .patch('/api/articles/1')
             .send({ inc_votes: 5 })
@@ -129,12 +129,16 @@ describe('/api', () => {
                   body: expect.any(String),
                   topic: expect.any(String),
                   created_at: expect.any(String),
-                  votes: 105
-                  // comment_count: 18
+                  votes: 105,
+                  comment_count: 13
                 })
               );
             });
         });
+        it('PATCH - ERROR status 404 - article does not exist', () => {});
+        it('PATCH - ERROR status 400 - bad request on article_id', () => {});
+        it('PATCH - ERROR status 400 - bad request body missing required fields', () => {});
+        it('PATCH - ERROR status 400 - bad request body incorrect type', () => {});
       });
     });
   });
