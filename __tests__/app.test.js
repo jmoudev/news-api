@@ -129,8 +129,8 @@ describe('/api', () => {
                   body: expect.any(String),
                   topic: expect.any(String),
                   created_at: expect.any(String),
-                  votes: 105,
-                  comment_count: 13
+                  votes: 105
+                  // comment_count: 13 COMMENT_COUNT NOT TO BE INCLUDED IN UPDATEARTICLE
                 })
               );
             });
@@ -180,7 +180,7 @@ describe('/api', () => {
       });
       describe('/comments', () => {
         describe('POST', () => {
-          it.only('POST - status 201 - return posted comment', () => {
+          it('POST - status 201 - return posted comment', () => {
             return request(app)
               .post('/api/articles/1/comments')
               .send({ username: 'butter_bridge', body: 'So true...' })
@@ -195,6 +195,70 @@ describe('/api', () => {
                     created_at: expect.any(String),
                     body: 'So true...'
                   })
+                );
+              });
+          });
+          it('POST - ERROR status 404 - article does not exist', () => {
+            return request(app)
+              .post('/api/articles/999/comments')
+              .send({ username: 'butter_bridge', body: 'So true...' })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Not Found - article_id: "999"');
+              });
+          });
+          it('POST - ERROR status 400 - bad request on article_id', () => {
+            return request(app)
+              .post('/api/articles/not_an_id/comments')
+              .send({ username: 'butter_bridge', body: 'So true...' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe(
+                  'Bad Request - invalid input syntax for type integer: "not_an_id"'
+                );
+              });
+          });
+          it('POST - ERROR status 400 - bad request body missing required field username', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ body: 'So true...' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe(
+                  'Bad Request - body missing required field: "username"'
+                );
+              });
+          });
+          it('POST - ERROR status 400 - bad request body missing required field body', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ username: 'butter_bridge' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe(
+                  'Bad Request - body missing required field: "body"'
+                );
+              });
+          });
+          it('POST - ERROR status 400 - bad request body missing both required fields', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({})
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe(
+                  'Bad Request - body missing required fields: "username" and "body"'
+                );
+              });
+          });
+          it('POST - ERROR status 400 - bad request username not valid', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ username: 'not_a_user', body: 'So true...' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe(
+                  'Bad Request - username: "not_a_user" does not exist'
                 );
               });
           });
