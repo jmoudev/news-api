@@ -22,23 +22,30 @@ exports.selectArticle = article_id => {
 
 exports.updateArticle = (article_id, inc_votes) => {
   return knex('articles')
-    .where({ 'articles.article_id': article_id })
+    .where({ article_id })
     .increment({ votes: inc_votes })
-    .then(() => {
-      return knex('articles')
-        .where({ 'articles.article_id': article_id })
-        .select('articles.*')
-        .count({ comment_count: 'comments.comment_id' })
-        .join('comments', { 'articles.article_id': 'comments.article_id' })
-        .groupBy('articles.article_id');
-    })
+    .returning('*')
     .then(([article]) => {
-      if (!article)
+      if (!article) {
         return Promise.reject({
           status: 404,
           msg: `Not Found - article_id: "${article_id}"`
         });
-      article.comment_count = +article.comment_count;
-      return { article };
+      } else return { article };
     });
 };
+
+// COMMENT_COUNT NOT TO BE INCLUDED IN UPDATEARTICLE
+// return knex('articles')
+//   .where({ 'articles.article_id': article_id })
+//   .increment({ votes: inc_votes })
+//   .then(() => {
+//     return knex('articles')
+//       .where({ 'articles.article_id': article_id })
+//       .select('articles.*')
+//       .count({ comment_count: 'comments.comment_id' })
+//       .join('comments', { 'articles.article_id': 'comments.article_id' })
+//       .groupBy('articles.article_id');
+//   })
+
+// article.comment_count = +article.comment_count; COMMENT_COUNT NOT TO BE INCLUDED
