@@ -31,13 +31,6 @@ exports.selectArticles = (
           msg: `Not Found`
         });
 
-      if (author) {
-        articles = articles.filter(article => article.author === author);
-      }
-      if (topic) {
-        articles = articles.filter(article => article.topic === topic);
-      }
-
       articles.forEach(article => {
         article.comment_count = +article.comment_count;
       });
@@ -58,7 +51,7 @@ exports.updateArticle = (article_id, inc_votes) => {
       if (!article) {
         return Promise.reject({
           status: 404,
-          msg: `Not Found - article_id: "${article_id}"`
+          msg: `Not Found`
         });
       } else return { article };
     });

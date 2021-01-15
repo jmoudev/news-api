@@ -1,7 +1,6 @@
 const knex = require('../connection');
 
 exports.selectUser = username => {
-  // console.log(user_id);
   return knex('users')
     .where({ username })
     .select('*')
@@ -9,7 +8,7 @@ exports.selectUser = username => {
       if (!user)
         return Promise.reject({
           status: 404,
-          msg: `Not Found - username: "${username}"`
+          msg: `Not Found`
         });
       else return { user };
     });

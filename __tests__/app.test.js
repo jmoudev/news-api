@@ -12,7 +12,7 @@ describe('route not found', () => {
       .get('/api/topic')
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('Not Found - path: "/api/topic"');
+        expect(body.msg).toBe('Not Found');
       });
   });
 });
@@ -29,7 +29,7 @@ describe('/api', () => {
             body.topics.forEach(topic => {
               expect(topic).toEqual(
                 expect.objectContaining({
-                  description: expect.any(String), // need to evaluate || null for  items without notNullable field
+                  description: expect.any(String),
                   slug: expect.any(String)
                 })
               );
@@ -59,15 +59,9 @@ describe('/api', () => {
               .get('/api/users/not_a_user')
               .expect(404)
               .then(({ body }) => {
-                expect(body.msg).toBe('Not Found - username: "not_a_user"');
+                expect(body.msg).toBe('Not Found');
               });
           });
-          // it(
-          //   ('GET - ERROR status 400 - bad request on username',
-          //   () => {
-          //     return request(app).get('/api/users/??').expect(404);
-          //   })
-          // );
         });
       });
     });
@@ -108,9 +102,7 @@ describe('/api', () => {
             .get('/api/articles/not_an_id')
             .expect(400)
             .then(({ body }) => {
-              expect(body.msg).toBe(
-                'Bad Request - invalid input syntax for type integer: "not_an_id"'
-              );
+              expect(body.msg).toBe('Bad Request');
             });
         });
       });
@@ -130,7 +122,6 @@ describe('/api', () => {
                   topic: expect.any(String),
                   created_at: expect.any(String),
                   votes: 105
-                  // comment_count: 13 COMMENT_COUNT NOT TO BE INCLUDED IN UPDATEARTICLE
                 })
               );
             });
@@ -141,7 +132,7 @@ describe('/api', () => {
             .send({ inc_votes: 5 })
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe('Not Found - article_id: "999"');
+              expect(body.msg).toBe('Not Found');
             });
         });
         it('PATCH - ERROR status 400 - bad request on article_id', () => {
@@ -150,9 +141,7 @@ describe('/api', () => {
             .send({ inc_votes: 5 })
             .expect(400)
             .then(({ body }) => {
-              expect(body.msg).toBe(
-                'Bad Request - invalid input syntax for type integer: "not_an_id"'
-              );
+              expect(body.msg).toBe('Bad Request');
             });
         });
         it('PATCH - ERROR status 400 - bad request body missing required fields', () => {
@@ -172,9 +161,7 @@ describe('/api', () => {
             .send({ inc_votes: 'not_an_int' })
             .expect(400)
             .then(({ body }) => {
-              expect(body.msg).toBe(
-                'Bad Request - invalid input syntax for type integer: "NaN"'
-              );
+              expect(body.msg).toBe('Bad Request');
             });
         });
       });
@@ -198,7 +185,6 @@ describe('/api', () => {
                 );
               });
           });
-          // probably better to keep errors simple i.e. Bad Request
           it('POST - ERROR status 404 - article does not exist', () => {
             return request(app)
               .post('/api/articles/999/comments')
@@ -214,9 +200,7 @@ describe('/api', () => {
               .send({ username: 'butter_bridge', body: 'So true...' })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).toBe(
-                  'Bad Request - invalid input syntax for type integer: "not_an_id"'
-                );
+                expect(body.msg).toBe('Bad Request');
               });
           });
           it('POST - ERROR status 400 - bad request body missing required field username', () => {
@@ -225,9 +209,7 @@ describe('/api', () => {
               .send({ body: 'So true...' })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).toBe(
-                  'Bad Request - body missing required field: "username"'
-                );
+                expect(body.msg).toBe('Bad Request');
               });
           });
           it('POST - ERROR status 400 - bad request body missing required field body', () => {
@@ -236,9 +218,7 @@ describe('/api', () => {
               .send({ username: 'butter_bridge' })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).toBe(
-                  'Bad Request - body missing required field: "body"'
-                );
+                expect(body.msg).toBe('Bad Request');
               });
           });
           it('POST - ERROR status 400 - bad request body missing both required fields', () => {
@@ -247,9 +227,7 @@ describe('/api', () => {
               .send({})
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).toBe(
-                  'Bad Request - body missing required fields: "username" and "body"'
-                );
+                expect(body.msg).toBe('Bad Request');
               });
           });
           it('POST - ERROR status 400 - bad request username not valid', () => {
@@ -324,9 +302,7 @@ describe('/api', () => {
               .get('/api/articles/not_an_id/comments')
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).toBe(
-                  'Bad Request - invalid input syntax for type integer: "not_an_id"'
-                );
+                expect(body.msg).toBe('Bad Request');
               });
           });
           it('GET - ERROR status 400 - bad request on sort_by query', () => {
@@ -400,7 +376,6 @@ describe('/api', () => {
           .get('/api/articles?topic=cats')
           .expect(200)
           .then(({ body }) => {
-            console.log(body);
             body.articles.forEach(article => {
               expect(article).toEqual(
                 expect.objectContaining({
@@ -498,13 +473,11 @@ describe('/api', () => {
             .expect(400)
             .send({ inc_votes: 5 })
             .then(({ body }) => {
-              expect(body.msg).toBe(
-                'Bad Request - invalid input syntax for type integer: "not_an_id"'
-              );
+              expect(body.msg).toBe('Bad Request');
             });
         });
       });
-      describe.only('DELETE', () => {
+      describe('DELETE', () => {
         it('DELETE - status 204 - ensure deleted content', () => {
           return request(app)
             .delete('/api/comments/1')
@@ -526,9 +499,7 @@ describe('/api', () => {
             .delete('/api/comments/not_an_id')
             .expect(400)
             .then(({ body }) => {
-              expect(body.msg).toBe(
-                'Bad Request - invalid input syntax for type integer: "not_an_id"'
-              );
+              expect(body.msg).toBe('Bad Request');
             });
         });
       });
