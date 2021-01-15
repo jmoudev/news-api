@@ -21,15 +21,9 @@ exports.postComment = (req, res, next) => {
   const { username, body } = req.body;
 
   if (!username || !body) {
-    let msgEnd;
-
-    if (!username && !body) msgEnd = 's: "username" and "body"';
-    else if (!username) msgEnd = ': "username"';
-    else msgEnd = ': "body"';
-
     next({
       status: 400,
-      msg: `Bad Request - body missing required field${msgEnd}`
+      msg: `Bad Request`
     });
   }
 
