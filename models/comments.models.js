@@ -55,11 +55,13 @@ exports.updateComment = (comment_id, inc_votes = 0) => {
 };
 
 exports.removeComment = comment_id => {
-  console.log(comment_id);
+  // console.log(comment_id);
   return knex('comments')
     .where({ comment_id })
     .del()
-    .then(comment => {
-      console.log(comment);
+    .then(rowsDeleted => {
+      if (!rowsDeleted) {
+        return Promise.reject({ status: 404, msg: 'Not Found' });
+      }
     });
 };

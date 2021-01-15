@@ -504,16 +504,31 @@ describe('/api', () => {
             });
         });
       });
-      describe('DELETE', () => {
-        it.only('DELETE - status 204 - ensure deleted content', () => {
+      describe.only('DELETE', () => {
+        it('DELETE - status 204 - ensure deleted content', () => {
           return request(app)
             .delete('/api/comments/1')
             .expect(204)
             .then(() => {
               return request(app).get('/api/comments/1').expect(404);
-            })
+            });
+        });
+        it('DELETE - ERROR status 404 - comment does not exist', () => {
+          return request(app)
+            .delete('/api/comments/999')
+            .expect(404)
             .then(({ body }) => {
               expect(body.msg).toBe('Not Found');
+            });
+        });
+        it('DELETE - ERROR status 400 - bad request on comment_id', () => {
+          return request(app)
+            .delete('/api/comments/not_an_id')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe(
+                'Bad Request - invalid input syntax for type integer: "not_an_id"'
+              );
             });
         });
       });
