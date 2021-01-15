@@ -447,9 +447,10 @@ describe('/api', () => {
   describe('/comments', () => {
     describe('/:comment_id', () => {
       describe('PATCH', () => {
-        it('PATCH - status 201 - return updated comment with incremented votes integer', () => {
+        it('PATCH - status 200 - return updated comment with incremented votes integer', () => {
           return request(app)
             .patch('/api/comments/1')
+            .expect(200)
             .send({ inc_votes: 5 })
             .then(({ body }) => {
               expect(body.comment).toEqual(
@@ -457,11 +458,62 @@ describe('/api', () => {
                   comment_id: 1,
                   username: expect.any(String),
                   article_id: expect.any(Number),
-                  votes: expect.any(Number),
+                  votes: 21,
                   created_at: expect.any(String),
                   body: expect.any(String)
                 })
               );
+            });
+        });
+        it('PATCH - status 200 - return comment when empty body provided', () => {
+          return request(app)
+            .patch('/api/comments/1')
+            .expect(200)
+            .send({})
+            .then(({ body }) => {
+              expect(body.comment).toEqual(
+                expect.objectContaining({
+                  comment_id: 1,
+                  username: expect.any(String),
+                  article_id: expect.any(Number),
+                  votes: 16,
+                  created_at: expect.any(String),
+                  body: expect.any(String)
+                })
+              );
+            });
+        });
+        it('PATCH - ERROR status 404 - comment does not exist', () => {
+          return request(app)
+            .patch('/api/comments/999')
+            .expect(404)
+            .send({ inc_votes: 5 })
+            .then(({ body }) => {
+              expect(body.msg).toBe('Not Found');
+            });
+        });
+        it('PATCH - ERROR status 400 - bad request on comment_id', () => {
+          return request(app)
+            .patch('/api/comments/not_an_id')
+            .expect(400)
+            .send({ inc_votes: 5 })
+            .then(({ body }) => {
+              expect(body.msg).toBe(
+                'Bad Request - invalid input syntax for type integer: "not_an_id"'
+              );
+            });
+        });
+      });
+      describe('DELETE', () => {
+        it.only('DELETE - status 204 - ensure deleted content', () => {
+          return request(app)
+            .delete('/api/comments/1')
+            .expect(204)
+            .then(() => {
+              return request(app).get('/api/comments/1').expect(404);
+            })
+            .then(({ body }) => {
+              expect(body.msg).toBe('Not Found');
             });
         });
       });
