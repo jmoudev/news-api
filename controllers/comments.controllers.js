@@ -1,4 +1,18 @@
-const { createComment } = require('../models/comments.models');
+const {
+  selectCommentsByArticle,
+  createComment
+} = require('../models/comments.models');
+
+exports.getCommentsByArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  const { sort_by, order } = req.query;
+
+  selectCommentsByArticle(article_id, sort_by, order)
+    .then(comments => {
+      res.status(200).send(comments);
+    })
+    .catch(next);
+};
 
 exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
