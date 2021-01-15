@@ -40,7 +40,7 @@ describe('/api', () => {
     describe('/users', () => {
       describe('/:username', () => {
         describe('GET', () => {
-          it('GET - status 200 - returns specific user', () => {
+          it('GET - status 200 - returns specified user', () => {
             return request(app)
               .get('/api/users/butter_bridge')
               .expect(200)
@@ -76,7 +76,7 @@ describe('/api', () => {
   describe('/articles', () => {
     describe('/:article_id', () => {
       describe('GET', () => {
-        it('GET - status 200 - return specific article', () => {
+        it('GET - status 200 - return specified article', () => {
           return request(app)
             .get('/api/articles/1')
             .expect(200)
@@ -100,7 +100,7 @@ describe('/api', () => {
             .get('/api/articles/999')
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe('Not Found - article_id: "999"');
+              expect(body.msg).toBe('Not Found');
             });
         });
         it('GET - ERROR status 400 - bad request on article_id', () => {
@@ -115,7 +115,7 @@ describe('/api', () => {
         });
       });
       describe('PATCH', () => {
-        it('PATCH - status 201 - return article with updated votes integer', () => {
+        it('PATCH - status 201 - return specified article with updated votes integer', () => {
           return request(app)
             .patch('/api/articles/1')
             .send({ inc_votes: 5 })
@@ -198,13 +198,14 @@ describe('/api', () => {
                 );
               });
           });
+          // probably better to keep errors simple i.e. Bad Request
           it('POST - ERROR status 404 - article does not exist', () => {
             return request(app)
               .post('/api/articles/999/comments')
               .send({ username: 'butter_bridge', body: 'So true...' })
               .expect(404)
               .then(({ body }) => {
-                expect(body.msg).toBe('Not Found - article_id: "999"');
+                expect(body.msg).toBe('Not Found');
               });
           });
           it('POST - ERROR status 400 - bad request on article_id', () => {
@@ -255,13 +256,213 @@ describe('/api', () => {
             return request(app)
               .post('/api/articles/1/comments')
               .send({ username: 'not_a_user', body: 'So true...' })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Not Found');
+              });
+          });
+        });
+        describe('GET', () => {
+          it('GET - status 200 - returns array of comments for specified article sorted by default on created_at column descending order', () => {
+            return request(app)
+              .get('/api/articles/1/comments')
+              .expect(200)
+              .then(({ body }) => {
+                body.comments.forEach(comment => {
+                  expect(comment).toEqual(
+                    expect.objectContaining({
+                      comment_id: expect.any(Number),
+                      votes: expect.any(Number),
+                      created_at: expect.any(String),
+                      author: expect.any(String),
+                      body: expect.any(String),
+                      article_id: 1
+                    })
+                  );
+                  expect(body.comments).toBeSortedBy('created_at', {
+                    descending: true
+                  });
+                });
+              });
+          });
+          it('GET - status 200 - returns array of comments with sort_by query on alternative column in default descending order', () => {
+            return request(app)
+              .get('/api/articles/1/comments?sort_by=votes')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments).toBeSortedBy('votes', {
+                  descending: true
+                });
+              });
+          });
+          it('GET - status 200 - returns array of comments with sort_by and order queries on alternative column and in ascending order', () => {
+            return request(app)
+              .get('/api/articles/1/comments?sort_by=votes&&order=asc')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments).toBeSortedBy('votes');
+              });
+          });
+          it('GET - status 200 - returns empty array when no existing comments per article', () => {
+            return request(app)
+              .get('/api/articles/7/comments')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments).toEqual([]);
+              });
+          });
+          it('GET - ERROR status 404 - article does not exist', () => {
+            return request(app)
+              .get('/api/articles/999/comments')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Not Found');
+              });
+          });
+          it('GET - ERROR status 400 - bad request on article_id', () => {
+            return request(app)
+              .get('/api/articles/not_an_id/comments')
               .expect(400)
               .then(({ body }) => {
                 expect(body.msg).toBe(
-                  'Bad Request - username: "not_a_user" does not exist'
+                  'Bad Request - invalid input syntax for type integer: "not_an_id"'
                 );
               });
           });
+          it('GET - ERROR status 400 - bad request on sort_by query', () => {
+            return request(app)
+              .get('/api/articles/1/comments?sort_by=not_a_column')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Bad Request');
+              });
+          });
+          it('GET - ERROR status 400 - bad request on order query', () => {
+            return request(app)
+              .get('/api/articles/1/comments?order=not_an_order')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Bad Request');
+              });
+          });
+        });
+      });
+    });
+    describe('GET', () => {
+      it('GET - status 200 - return array of article objects which is sorted by default to created_at in descending order', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body }) => {
+            body.articles.forEach(article => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: expect.any(Number),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  comment_count: expect.any(Number)
+                })
+              );
+              expect(body.articles).toBeSortedBy('created_at', {
+                descending: true
+              });
+              expect(body.articles.length).toBe(12);
+            });
+          });
+      });
+      it('GET - status 200 - return array of article objects with sort_by and order queries on alternative column and ascending order', () => {
+        return request(app)
+          .get('/api/articles?sort_by=author&&order=asc')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toBeSortedBy('author');
+          });
+      });
+      it('GET - status 200 - return array of article objects with author query filtering column based on specified author', () => {
+        return request(app)
+          .get('/api/articles?author=butter_bridge')
+          .expect(200)
+          .then(({ body }) => {
+            body.articles.forEach(article => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  author: 'butter_bridge'
+                })
+              );
+            });
+          });
+      });
+      it('GET - status 200 - return array of article objects with author query filtering column based on specified author', () => {
+        return request(app)
+          .get('/api/articles?topic=cats')
+          .expect(200)
+          .then(({ body }) => {
+            console.log(body);
+            body.articles.forEach(article => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  topic: 'cats'
+                })
+              );
+            });
+          });
+      });
+      it('GET - ERROR status 400 - bad request on sort_by query', () => {
+        return request(app)
+          .get('/api/articles?sort_by=not_a_column')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad Request');
+          });
+      });
+      it('GET - ERROR status 400 - bad request on order query', () => {
+        return request(app)
+          .get('/api/articles?order=not_an_order')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad Request');
+          });
+      });
+      it('GET - ERROR status 404 - author does not exist', () => {
+        return request(app)
+          .get('/api/articles?author=not_an_author')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Not Found');
+          });
+      });
+      it('GET - ERROR status 404 - topic does not exist', () => {
+        return request(app)
+          .get('/api/articles?topic=not_a_topic')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Not Found');
+          });
+      });
+    });
+  });
+  describe('/comments', () => {
+    describe('/:comment_id', () => {
+      describe('PATCH', () => {
+        it('PATCH - status 201 - return updated comment with incremented votes integer', () => {
+          return request(app)
+            .patch('/api/comments/1')
+            .send({ inc_votes: 5 })
+            .then(({ body }) => {
+              expect(body.comment).toEqual(
+                expect.objectContaining({
+                  comment_id: 1,
+                  username: expect.any(String),
+                  article_id: expect.any(Number),
+                  votes: expect.any(Number),
+                  created_at: expect.any(String),
+                  body: expect.any(String)
+                })
+              );
+            });
         });
       });
     });
