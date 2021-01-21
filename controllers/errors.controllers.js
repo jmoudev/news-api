@@ -1,3 +1,7 @@
+exports.customErr400 = () =>
+  Promise.reject({ status: 400, msg: 'Bad Request' });
+exports.customErr404 = () => Promise.reject({ status: 404, msg: 'Not Found' });
+
 exports.handleRouteNotFound = (req, res, next) => {
   next({ status: 404, msg: `Not Found` });
 };

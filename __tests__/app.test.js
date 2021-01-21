@@ -1,6 +1,7 @@
 const request = require('supertest');
 const connection = require('../connection');
 const app = require('../app');
+const apiList = require('../api-list');
 
 afterAll(() => connection.destroy());
 
@@ -14,6 +15,20 @@ describe('/*', () => {
       .then(({ body }) => {
         expect(body.msg).toBe('Not Found');
       });
+  });
+});
+
+describe('/api', () => {
+  describe('GET all endpoints', () => {
+    xit('SUCCESS - status 200 - return endpoints object', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body }) => {
+          console.log(body.endpoints);
+          expect(body.endpoints).toEqual(apiList);
+        });
+    });
   });
 });
 
@@ -36,7 +51,20 @@ describe('/api/topics', () => {
         });
     });
     describe('POST topic', () => {
-      it('', () => {});
+      xit('SUCESS - status 201 - returns new comment', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({ slug: 'dogs', description: "they're coming out of the sky" })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.comment).toEqual(
+              expect.objectContaining({
+                slug: '',
+                description: ''
+              })
+            );
+          });
+      });
     });
   });
 });
@@ -256,9 +284,7 @@ describe('/api/articles', () => {
           .send({})
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).toBe(
-              'Bad Request - missing required field: "inc_votes"'
-            );
+            expect(body.msg).toBe('Bad Request');
           });
       });
       it('ERROR - status 400 - bad request body incorrect type', () => {
@@ -355,7 +381,7 @@ describe('/api/articles', () => {
         });
       });
       describe('POST comment by article_id', () => {
-        it('SUCCESS - status 201 - return posted comment', () => {
+        it('SUCCESS - status 201 - returns new comment', () => {
           return request(app)
             .post('/api/articles/1/comments')
             .send({ username: 'butter_bridge', body: 'So true...' })

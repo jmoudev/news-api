@@ -1,4 +1,8 @@
 const knex = require('../connection');
+const {
+  customErr400,
+  customErr404
+} = require('../controllers/errors.controllers');
 
 exports.selectArticles = (
   article_id,
@@ -8,8 +12,9 @@ exports.selectArticles = (
   topic
 ) => {
   if (order !== 'asc' && order !== 'desc') {
-    return Promise.reject({ status: 400, msg: 'Bad Request' });
+    return customErr400();
   }
+
   return knex('articles')
     .select('articles.*')
     .count({ comment_count: 'comments.comment_id' })
@@ -25,11 +30,7 @@ exports.selectArticles = (
       query.where(filters);
     })
     .then(articles => {
-      if (!articles.length)
-        return Promise.reject({
-          status: 404,
-          msg: `Not Found`
-        });
+      if (!articles.length) return customErr404();
 
       articles.forEach(article => {
         article.comment_count = +article.comment_count;
@@ -37,22 +38,24 @@ exports.selectArticles = (
 
       if (article_id) {
         const [article] = articles;
-        return { article };
-      } else return { articles };
+        return article;
+      } else return articles;
     });
 };
 
 exports.updateArticle = (article_id, inc_votes) => {
+  // to be flexible for future dev could not throw an error, therefore could default to zero
+  if (!inc_votes) {
+    return customErr400();
+  }
+
   return knex('articles')
     .where({ article_id })
     .increment({ votes: inc_votes })
     .returning('*')
     .then(([article]) => {
       if (!article) {
-        return Promise.reject({
-          status: 404,
-          msg: `Not Found`
-        });
-      } else return { article };
+        return customErr404();
+      } else return article;
     });
 };
