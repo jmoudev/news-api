@@ -14,22 +14,21 @@ const {
 exports.seed = function (knex) {
   return knex.migrate
     .rollback()
+    .then(() => knex.migrate.latest())
+    .then(() => knex('topics').insert(topicData))
+    .then(() => knex('users').insert(userData))
     .then(() => {
-      return knex.migrate.latest();
-    })
-    .then(() => {
-      return knex('topics').insert(topicData).returning('*');
-    })
-    .then(topicRows => {
-      return knex('users').insert(userData).returning('*');
-    })
-    .then(userRows => {
       const formattedArticles = formatArticlesData(articleData);
+
       return knex('articles').insert(formattedArticles).returning('*');
     })
     .then(articleRows => {
-      const articleLookup = createArticleLookup(articleRows)
-      const formattedCommentsData = formatCommentsData(commentData, articleLookup);
-      return knex('comments').insert(formattedCommentsData).returning('*');
+      const articleLookup = createArticleLookup(articleRows);
+      const formattedCommentsData = formatCommentsData(
+        commentData,
+        articleLookup
+      );
+
+      return knex('comments').insert(formattedCommentsData);
     });
 };

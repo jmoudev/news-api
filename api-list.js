@@ -14,7 +14,7 @@ const apiList = {
     path: '/api/articles/:article_id/comments',
     methods: ['get', 'post']
   },
-  comments: {
+  comment: {
     path: '/api/comments/:comment_id',
     methods: ['patch', 'delete']
   }

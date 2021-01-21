@@ -1,4 +1,8 @@
 const knex = require('../connection');
+const {
+  customErr400,
+  customErr404
+} = require('../controllers/errors.controllers');
 
 exports.selectCommentsByArticle = (
   article_id,
@@ -6,7 +10,7 @@ exports.selectCommentsByArticle = (
   order = 'desc'
 ) => {
   if (order !== 'asc' && order !== 'desc') {
-    return Promise.reject({ status: 400, msg: 'Bad Request' });
+    return customErr400();
   }
 
   return knex('articles')
@@ -14,7 +18,7 @@ exports.selectCommentsByArticle = (
     .select('*')
     .then(articles => {
       if (!articles.length) {
-        return Promise.reject({ status: 404, msg: 'Not Found' });
+        return customErr404();
       } else {
         return knex('articles')
           .where({ 'articles.article_id': article_id })
@@ -34,6 +38,10 @@ exports.selectCommentsByArticle = (
 };
 
 exports.createComment = (article_id, username, body) => {
+  if (!username || !body) {
+    return customErr400();
+  }
+
   return knex('comments')
     .insert({ article_id, username, body })
     .returning('*')
@@ -47,7 +55,7 @@ exports.updateComment = (comment_id, inc_votes = 0) => {
     .returning('*')
     .then(([comment]) => {
       if (!comment) {
-        return Promise.reject({ status: 404, msg: 'Not Found' });
+        return customErr404();
       }
       return { comment };
     });
@@ -59,7 +67,7 @@ exports.removeComment = comment_id => {
     .del()
     .then(rowsDeleted => {
       if (!rowsDeleted) {
-        return Promise.reject({ status: 404, msg: 'Not Found' });
+        return customErr404();
       }
     });
 };
