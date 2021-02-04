@@ -1,8 +1,5 @@
 const knex = require('../connection');
-const {
-  customErr400,
-  customErr404
-} = require('../controllers/errors.controllers');
+const { custom400Err, custom404Err } = require('./custom-errors');
 
 exports.selectArticles = (
   article_id,
@@ -12,7 +9,7 @@ exports.selectArticles = (
   topic
 ) => {
   if (order !== 'asc' && order !== 'desc') {
-    return customErr400();
+    return Promise.reject(custom400Err);
   }
 
   return knex('articles')
@@ -30,7 +27,7 @@ exports.selectArticles = (
       query.where(filters);
     })
     .then(articles => {
-      if (!articles.length) return customErr404();
+      if (!articles.length) return Promise.reject(custom404Err);
 
       articles.forEach(article => {
         article.comment_count = +article.comment_count;
@@ -46,7 +43,7 @@ exports.selectArticles = (
 exports.updateArticle = (article_id, inc_votes) => {
   // to be flexible for future dev could not throw an error, therefore could default to zero
   if (!inc_votes) {
-    return customErr400();
+    return Promise.reject(custom400Err);
   }
 
   return knex('articles')
@@ -55,7 +52,7 @@ exports.updateArticle = (article_id, inc_votes) => {
     .returning('*')
     .then(([article]) => {
       if (!article) {
-        return customErr404();
+        return Promise.reject(custom404Err);
       } else return article;
     });
 };

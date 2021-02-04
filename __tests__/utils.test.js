@@ -58,7 +58,7 @@ describe('formatArticlesData', () => {
     ];
     expect(formatArticlesData(input)).toEqual(expected);
   });
-  it('does not mutate original array', () => {
+  it('input is not mutated', () => {
     formatArticlesData(testArticles);
     expect(testArticles).toEqual([
       {

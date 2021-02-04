@@ -1,8 +1,6 @@
 const knex = require('../connection');
-const {
-  customErr400,
-  customErr404
-} = require('../controllers/errors.controllers');
+const { custom400Err, custom404Err } = require('./custom-errors');
+const { selectArticles } = require('../models/articles.models');
 
 exports.selectCommentsByArticle = (
   article_id,
@@ -10,15 +8,16 @@ exports.selectCommentsByArticle = (
   order = 'desc'
 ) => {
   if (order !== 'asc' && order !== 'desc') {
-    return customErr400();
+    return Promise.reject(custom400Err);
   }
 
+  // Error when trying to reuse selectArticles
   return knex('articles')
     .where({ article_id })
     .select('*')
     .then(articles => {
       if (!articles.length) {
-        return customErr404();
+        return Promise.reject(custom404Err);
       } else {
         return knex('articles')
           .where({ 'articles.article_id': article_id })
@@ -33,19 +32,19 @@ exports.selectCommentsByArticle = (
         delete comment.username;
       });
 
-      return { comments };
+      return comments;
     });
 };
 
 exports.createComment = (article_id, username, body) => {
   if (!username || !body) {
-    return customErr400();
+    return Promise.reject(custom400Err);
   }
 
   return knex('comments')
     .insert({ article_id, username, body })
     .returning('*')
-    .then(([comment]) => ({ comment }));
+    .then(([comment]) => comment);
 };
 
 exports.updateComment = (comment_id, inc_votes = 0) => {
@@ -55,9 +54,9 @@ exports.updateComment = (comment_id, inc_votes = 0) => {
     .returning('*')
     .then(([comment]) => {
       if (!comment) {
-        return customErr404();
+        return Promise.reject(custom404Err);
       }
-      return { comment };
+      return comment;
     });
 };
 
@@ -67,7 +66,7 @@ exports.removeComment = comment_id => {
     .del()
     .then(rowsDeleted => {
       if (!rowsDeleted) {
-        return customErr404();
+        return Promise.reject(custom404Err);
       }
     });
 };

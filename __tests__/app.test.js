@@ -33,6 +33,15 @@ describe('/api', () => {
 });
 
 describe('/api/topics', () => {
+  it('ERROR - status 405 - method not allowed', () => {
+    return request(app)
+      .patch('/api/topics')
+      .send({})
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Method Not Allowed');
+      });
+  });
   describe('GET all topics', () => {
     it('SUCCESS - status 200 - returns all topics', () => {
       return request(app)
@@ -105,6 +114,15 @@ describe('/api/users', () => {
 });
 
 describe('/api/articles', () => {
+  it('ERROR - status 405 - method not allowed', () => {
+    return request(app)
+      .put('/api/topics')
+      .send({})
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Method Not Allowed');
+      });
+  });
   describe('GET articles', () => {
     it('SUCCESS - status 200 - return array of article objects which is sorted by default to created_at in descending order', () => {
       return request(app)
