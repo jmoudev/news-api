@@ -1,12 +1,12 @@
 const knex = require('../connection');
-const { customErr404 } = require('../controllers/errors.controllers');
+const { custom404Err } = require('./custom-errors');
 
 exports.selectUser = username => {
   return knex('users')
     .where({ username })
     .select('*')
     .then(([user]) => {
-      if (!user) return customErr404();
-      else return { user };
+      if (!user) return Promise.reject(custom404Err);
+      else return user;
     });
 };

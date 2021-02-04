@@ -11,7 +11,7 @@ exports.getCommentsByArticle = (req, res, next) => {
 
   selectCommentsByArticle(article_id, sort_by, order)
     .then(comments => {
-      res.status(200).send(comments);
+      res.status(200).send({ comments });
     })
     .catch(next);
 };
@@ -22,7 +22,7 @@ exports.postComment = (req, res, next) => {
 
   createComment(article_id, username, body)
     .then(comment => {
-      res.status(201).send(comment);
+      res.status(201).send({ comment });
     })
     .catch(next);
 };
@@ -33,7 +33,7 @@ exports.patchComment = (req, res, next) => {
 
   updateComment(comment_id, inc_votes)
     .then(comment => {
-      res.status(200).send(comment);
+      res.status(200).send({ comment });
     })
     .catch(next);
 };

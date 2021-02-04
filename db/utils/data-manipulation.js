@@ -10,7 +10,7 @@ exports.formatArticlesData = rawData => {
 };
 
 exports.formatCommentsData = (commentsArr, articleLookup) => {
-  return commentsArr.map(comment => {
+  const formattedComments = commentsArr.map(comment => {
     const newComment = { ...comment };
 
     newComment.article_id = articleLookup[comment.belongs_to];
@@ -23,6 +23,8 @@ exports.formatCommentsData = (commentsArr, articleLookup) => {
 
     return newComment;
   });
+
+  return formattedComments;
 };
 
 exports.createArticleLookup = articlesArr => {
