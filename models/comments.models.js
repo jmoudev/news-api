@@ -61,12 +61,5 @@ exports.updateComment = (comment_id, inc_votes = 0) => {
 };
 
 exports.removeComment = comment_id => {
-  return knex('comments')
-    .where({ comment_id })
-    .del()
-    .then(rowsDeleted => {
-      if (!rowsDeleted) {
-        return Promise.reject(custom404Err);
-      }
-    });
+  return knex('comments').where({ comment_id }).del();
 };
