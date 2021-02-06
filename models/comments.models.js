@@ -44,7 +44,12 @@ exports.createComment = (article_id, username, body) => {
   return knex('comments')
     .insert({ article_id, username, body })
     .returning('*')
-    .then(([comment]) => comment);
+    .then(([comment]) => {
+      comment.author = comment.username;
+      delete comment.username;
+
+      return comment;
+    });
 };
 
 exports.updateComment = (comment_id, inc_votes = 0) => {
