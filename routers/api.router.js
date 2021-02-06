@@ -4,10 +4,11 @@ const usersRouter = require('./users.router');
 const articlesRouter = require('./articles.router');
 const commentsRouter = require('./comments.router');
 const { getEndpoints } = require('../controllers/api.controllers');
+const { handleMethodNotAllowed } = require('../controllers/errors.controllers');
 
 const apiRouter = express.Router();
 
-apiRouter.route('/').get(getEndpoints);
+apiRouter.route('/').get(getEndpoints).all(handleMethodNotAllowed);
 
 apiRouter.use('/topics', topicsRouter);
 apiRouter.use('/users', usersRouter);

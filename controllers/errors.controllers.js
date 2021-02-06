@@ -6,6 +6,10 @@ exports.handleRouteNotFound = (req, res, next) => {
   next({ status: 404, msg: `Not Found` });
 };
 
+exports.handleMethodNotAllowed = (req, res, next) => {
+  next({ status: 405, msg: 'Method Not Allowed' });
+};
+
 exports.handleCustomErrors = (err, req, res, next) => {
   if (err.status && err.msg) {
     res.status(err.status).send({ msg: err.msg });
