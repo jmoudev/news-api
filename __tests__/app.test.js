@@ -530,7 +530,7 @@ describe('/api/comments', () => {
           expect(body.msg).toBe('Method Not Allowed');
         });
     });
-    describe.only('PATCH comment votes by comment_id', () => {
+    describe('PATCH comment votes by comment_id', () => {
       it('SUCCESS - status 200 - return updated comment with incremented votes integer', () => {
         return request(app)
           .patch('/api/comments/1')
@@ -586,21 +586,21 @@ describe('/api/comments', () => {
           });
       });
     });
-    describe('DELETE comment by comment_id', () => {
+    describe.only('DELETE comment by comment_id', () => {
       it('SUCCESS - status 204 - ensure deleted content', () => {
         return request(app)
           .delete('/api/comments/1')
           .expect(204)
-          .then(() => {
-            return request(app).get('/api/comments/1').expect(404);
+          .then(({ body }) => {
+            expect(body).toEqual({});
           });
       });
-      it('ERROR - ERROR status 404 - comment does not exist', () => {
+      it('SUCCESS - status 204 - comment does not exist', () => {
         return request(app)
           .delete('/api/comments/999')
-          .expect(404)
+          .expect(204)
           .then(({ body }) => {
-            expect(body.msg).toBe('Not Found');
+            expect(body).toEqual({});
           });
       });
       it('ERROR - ERROR status 400 - bad request on comment_id', () => {
