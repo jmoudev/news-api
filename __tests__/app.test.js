@@ -19,13 +19,21 @@ describe('/*', () => {
 });
 
 describe('/api', () => {
+  it('ERROR - status 405 - method not allowed', () => {
+    return request(app)
+      .patch('/api')
+      .send({})
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Method Not Allowed');
+      });
+  });
   describe('GET all endpoints', () => {
-    xit('SUCCESS - status 200 - return endpoints object', () => {
+    it('SUCCESS - status 200 - return endpoints object', () => {
       return request(app)
         .get('/api')
         .expect(200)
         .then(({ body }) => {
-          console.log(body.endpoints);
           expect(body.endpoints).toEqual(apiList);
         });
     });
@@ -79,6 +87,15 @@ describe('/api/topics', () => {
 });
 
 describe('/api/users', () => {
+  it('ERROR - status 405 - method not allowed', () => {
+    return request(app)
+      .patch('/api/topics')
+      .send({})
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Method Not Allowed');
+      });
+  });
   describe('GET all users', () => {
     it('', () => {});
   });
@@ -116,7 +133,7 @@ describe('/api/users', () => {
 describe('/api/articles', () => {
   it('ERROR - status 405 - method not allowed', () => {
     return request(app)
-      .put('/api/topics')
+      .put('/api/articles')
       .send({})
       .expect(405)
       .then(({ body }) => {
@@ -221,6 +238,15 @@ describe('/api/articles', () => {
     it('', () => {});
   });
   describe('/api/articles/:article_id', () => {
+    it('ERROR - status 405 - method not allowed', () => {
+      return request(app)
+        .put('/api/articles/1')
+        .send({})
+        .expect(405)
+        .then(({ body }) => {
+          expect(body.msg).toBe('Method Not Allowed');
+        });
+    });
     describe('GET article by article_id', () => {
       it('SUCCESS - status 200 - return specified article', () => {
         return request(app)
@@ -316,6 +342,15 @@ describe('/api/articles', () => {
       });
     });
     describe('/api/articles/:article_id/comments', () => {
+      it.only('ERROR - status 405 - method not allowed', () => {
+        return request(app)
+          .patch('/api/articles/1/comments')
+          .send({})
+          .expect(405)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Method Not Allowed');
+          });
+      });
       describe('GET comments by article_id', () => {
         it('SUCCESS - status 200 - returns array of comments for specified article sorted by default on created_at column descending order', () => {
           return request(app)
