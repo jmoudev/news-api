@@ -442,7 +442,7 @@ describe('/api/articles', () => {
             });
         });
       });
-      describe.only('POST comment by article_id', () => {
+      describe('POST comment by article_id', () => {
         it('SUCCESS - status 201 - returns new comment', () => {
           return request(app)
             .post('/api/articles/1/comments')
@@ -530,7 +530,7 @@ describe('/api/comments', () => {
           expect(body.msg).toBe('Method Not Allowed');
         });
     });
-    describe('PATCH comment votes by comment_id', () => {
+    describe.only('PATCH comment votes by comment_id', () => {
       it('SUCCESS - status 200 - return updated comment with incremented votes integer', () => {
         return request(app)
           .patch('/api/comments/1')

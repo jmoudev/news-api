@@ -57,12 +57,7 @@ exports.updateComment = (comment_id, inc_votes = 0) => {
     .where({ comment_id })
     .increment({ votes: inc_votes })
     .returning('*')
-    .then(([comment]) => {
-      if (!comment) {
-        return Promise.reject(custom404Err);
-      }
-      return comment;
-    });
+    .then(([comment]) => comment);
 };
 
 exports.removeComment = comment_id => {
