@@ -155,7 +155,7 @@ describe('/api/articles', () => {
                 topic: expect.any(String),
                 created_at: expect.any(String),
                 votes: expect.any(Number),
-                comment_count: expect.any(Number)
+                comment_count: expect.any(String)
               })
             );
             expect(body.articles).toBeSortedBy('created_at', {
@@ -201,6 +201,22 @@ describe('/api/articles', () => {
           });
         });
     });
+    it('SUCCESS - status 200 - author does not exist on query', () => {
+      return request(app)
+        .get('/api/articles?author=not_an_author')
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).toEqual([]);
+        });
+    });
+    it('SUCCESS - status 200 - topic does not exist on query', () => {
+      return request(app)
+        .get('/api/articles?topic=not_a_topic')
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).toEqual([]);
+        });
+    });
     it('ERROR - status 400 - bad request on sort_by query', () => {
       return request(app)
         .get('/api/articles?sort_by=not_a_column')
@@ -215,22 +231,6 @@ describe('/api/articles', () => {
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).toBe('Bad Request');
-        });
-    });
-    it('ERROR - status 404 - author does not exist', () => {
-      return request(app)
-        .get('/api/articles?author=not_an_author')
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).toBe('Not Found');
-        });
-    });
-    it('ERROR - status 404 - topic does not exist', () => {
-      return request(app)
-        .get('/api/articles?topic=not_a_topic')
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).toBe('Not Found');
         });
     });
   });
@@ -262,7 +262,7 @@ describe('/api/articles', () => {
                 topic: expect.any(String),
                 created_at: expect.any(String),
                 votes: expect.any(Number),
-                comment_count: 13
+                comment_count: expect.any(String)
               })
             );
           });
@@ -285,11 +285,11 @@ describe('/api/articles', () => {
       });
     });
     describe('PATCH article votes by article_id', () => {
-      it('SUCCESS - status 201 - return specified article with updated votes integer', () => {
+      it('SUCCESS - status 200 - return specified article with updated votes integer', () => {
         return request(app)
           .patch('/api/articles/1')
           .send({ inc_votes: 5 })
-          .expect(201)
+          .expect(200)
           .then(({ body }) => {
             expect(body.article).toEqual(
               expect.objectContaining({
@@ -302,6 +302,23 @@ describe('/api/articles', () => {
                 votes: 105
               })
             );
+          });
+      });
+      it('SUCCESS - status 200 - no information in request body does not update article', () => {
+        return request(app)
+          .get('/api/articles/1')
+          .then(({ body }) => {
+            const originalArticle = body.article;
+
+            delete originalArticle.comment_count;
+
+            return request(app)
+              .patch('/api/articles/1')
+              .send({})
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toEqual(originalArticle);
+              });
           });
       });
       it('ERROR - status 404 - article does not exist', () => {
@@ -322,15 +339,7 @@ describe('/api/articles', () => {
             expect(body.msg).toBe('Bad Request');
           });
       });
-      it('ERROR - status 400 - bad request body missing required fields', () => {
-        return request(app)
-          .patch('/api/articles/1')
-          .send({})
-          .expect(400)
-          .then(({ body }) => {
-            expect(body.msg).toBe('Bad Request');
-          });
-      });
+
       it('ERROR - status 400 - bad request body incorrect type', () => {
         return request(app)
           .patch('/api/articles/1')
@@ -342,7 +351,7 @@ describe('/api/articles', () => {
       });
     });
     describe('/api/articles/:article_id/comments', () => {
-      it.only('ERROR - status 405 - method not allowed', () => {
+      it('ERROR - status 405 - method not allowed', () => {
         return request(app)
           .patch('/api/articles/1/comments')
           .send({})
@@ -433,7 +442,7 @@ describe('/api/articles', () => {
             });
         });
       });
-      describe('POST comment by article_id', () => {
+      describe.only('POST comment by article_id', () => {
         it('SUCCESS - status 201 - returns new comment', () => {
           return request(app)
             .post('/api/articles/1/comments')
@@ -443,11 +452,10 @@ describe('/api/articles', () => {
               expect(body.comment).toEqual(
                 expect.objectContaining({
                   comment_id: expect.any(Number),
-                  username: 'butter_bridge',
-                  article_id: 1,
+                  author: 'butter_bridge',
+                  body: 'So true...',
                   votes: expect.any(Number),
-                  created_at: expect.any(String),
-                  body: 'So true...'
+                  created_at: expect.any(String)
                 })
               );
             });
@@ -513,6 +521,15 @@ describe('/api/articles', () => {
 
 describe('/api/comments', () => {
   describe('/api/comments/:comment_id', () => {
+    it('ERROR - status 405 - method not allowed', () => {
+      return request(app)
+        .put('/api/comments/1')
+        .send({})
+        .expect(405)
+        .then(({ body }) => {
+          expect(body.msg).toBe('Method Not Allowed');
+        });
+    });
     describe('PATCH comment votes by comment_id', () => {
       it('SUCCESS - status 200 - return updated comment with incremented votes integer', () => {
         return request(app)

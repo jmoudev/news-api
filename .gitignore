@@ -2,3 +2,4 @@ node_modules
 knexfile.js
 query.sql
 output.txt
+non_git_files
