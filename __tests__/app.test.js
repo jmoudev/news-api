@@ -585,8 +585,17 @@ describe('/api/comments', () => {
             expect(body.msg).toBe('Bad Request');
           });
       });
+      it('ERROR - ERROR status 400 - bad request on inc_votes', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .expect(400)
+          .send({ inc_votes: 'not_a_number' })
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad Request');
+          });
+      });
     });
-    describe.only('DELETE comment by comment_id', () => {
+    describe('DELETE comment by comment_id', () => {
       it('SUCCESS - status 204 - ensure deleted content', () => {
         return request(app)
           .delete('/api/comments/1')

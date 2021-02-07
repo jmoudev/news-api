@@ -1,16 +1,12 @@
 const knex = require('../connection');
 const { custom400Err, custom404Err } = require('./custom-errors');
-const { selectArticles } = require('../models/articles.models');
+const { selectArticleByArticleId } = require('../models/articles.models');
 
-exports.selectCommentsByArticle = (
+const selectCommentsByArticle = (
   article_id,
   sort_by = 'created_at',
   order = 'desc'
 ) => {
-  if (order !== 'asc' && order !== 'desc') {
-    return Promise.reject(custom400Err);
-  }
-
   // Error when trying to reuse selectArticles
   return knex('articles')
     .where({ article_id })
@@ -19,6 +15,9 @@ exports.selectCommentsByArticle = (
       if (!articles.length) {
         return Promise.reject(custom404Err);
       } else {
+        if (order !== 'asc' && order !== 'desc') {
+          return Promise.reject(custom400Err);
+        }
         return knex('articles')
           .where({ 'articles.article_id': article_id })
           .select('comments.*')
@@ -36,7 +35,7 @@ exports.selectCommentsByArticle = (
     });
 };
 
-exports.createComment = (article_id, username, body) => {
+const createComment = (article_id, username, body) => {
   if (!username || !body) {
     return Promise.reject(custom400Err);
   }
@@ -52,14 +51,30 @@ exports.createComment = (article_id, username, body) => {
     });
 };
 
-exports.updateComment = (comment_id, inc_votes = 0) => {
+const updateComment = (comment_id, inc_votes = 0) => {
   return knex('comments')
+    .select('*')
     .where({ comment_id })
-    .increment({ votes: inc_votes })
-    .returning('*')
-    .then(([comment]) => comment);
+    .then(comment => {
+      if (!comment.length) {
+        return Promise.reject(custom404Err);
+      } else {
+        return knex('comments')
+          .where({ comment_id })
+          .increment({ votes: inc_votes })
+          .returning('*')
+          .then(([comment]) => comment);
+      }
+    });
 };
 
-exports.removeComment = comment_id => {
+const removeComment = comment_id => {
   return knex('comments').where({ comment_id }).del();
+};
+
+module.exports = {
+  selectCommentsByArticle,
+  createComment,
+  updateComment,
+  removeComment
 };
