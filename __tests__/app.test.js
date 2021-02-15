@@ -96,10 +96,10 @@ describe('/api/users', () => {
         expect(body.msg).toBe('Method Not Allowed');
       });
   });
-  describe('GET all users', () => {
+  xdescribe('GET all users', () => {
     it('', () => {});
   });
-  describe('POST user', () => {
+  xdescribe('POST user', () => {
     it('', () => {});
   });
   describe('/api/users/:username', () => {
@@ -187,7 +187,7 @@ describe('/api/articles', () => {
           });
         });
     });
-    it('SUCCESS - status 200 - return array of article objects with author query filtering column based on specified author', () => {
+    it('SUCCESS - status 200 - return array of article objects with topic query filtering column based on specified topic', () => {
       return request(app)
         .get('/api/articles?topic=cats')
         .expect(200)
