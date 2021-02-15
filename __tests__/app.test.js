@@ -29,12 +29,12 @@ describe('/api', () => {
       });
   });
   describe('GET all endpoints', () => {
-    it('SUCCESS - status 200 - return endpoints object', () => {
+    it.only('SUCCESS - status 200 - return endpoints object', () => {
       return request(app)
         .get('/api')
         .expect(200)
         .then(({ body }) => {
-          expect(body.endpoints).toEqual(apiList);
+          expect(body).toEqual(apiList);
         });
     });
   });
